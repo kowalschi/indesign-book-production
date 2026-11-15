@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revizuire corectură</title>
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--ink:#1d1d1b;--mut:#6b6a66;--line:#e2e0da;--soft:#f2f1ed;
+ --ok:#1f7a3a;--okbg:#e6f4ea;--mod:#8a5a00;--modbg:#fff3d6;--no:#a3261d;--nobg:#fbe7e5;--hl:rgba(255,196,0,.35);--hlb:#e0a100}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,Segoe UI,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+header h1{font-size:16px;margin:0 12px 0 0}
+select,input,textarea,button{font:inherit}
+button{border:1px solid var(--line);background:var(--card);border-radius:6px;padding:5px 11px;cursor:pointer}
+button:hover{border-color:var(--mut)}
+.stats{color:var(--mut);margin-left:auto;font-size:13px}
+main{max-width:1400px;margin:0 auto;padding:16px}
+.leg{font-size:12px;color:var(--mut);margin:0 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:18px;overflow:hidden}
+.card.modificat{border-left:5px solid var(--mod)} .card.respins{border-left:5px solid var(--no)} .card.facut{border-left:5px solid #4b3f8f}
+.b-done{background:#eceaf6;color:#4b3f8f;border-color:#cfc8ea}
+.st.facut{color:#4b3f8f}
+.meta{display:grid;grid-template-columns:repeat(5,auto) 1fr;gap:0;border-bottom:1px solid var(--line);background:var(--soft)}
+.meta div{padding:6px 14px;border-right:1px solid var(--line);font-size:12px;color:var(--mut)}
+.meta b{display:block;font-size:15px;color:var(--ink)}
+.meta .ver{border-right:0;text-align:right}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:600}
+.v-confirmat{background:var(--okbg);color:var(--ok)} .v-carte{background:var(--modbg);color:var(--mod)}
+.v-neclar{background:#eceaf6;color:#4b3f8f} .v-obs{background:#e7eef9;color:#24508f}
+.body{display:grid;grid-template-columns:minmax(0,560px) minmax(0,1fr)}
+.pg{padding:10px;border-right:1px solid var(--line)}
+.tabs{display:flex;gap:6px;margin-bottom:8px}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.page{position:relative;display:inline-block;width:100%}
+.page[hidden]{display:none}
+.page img{width:100%;aspect-ratio:454/701;display:block;border:1px solid var(--line);background:var(--soft)}
+.hl{position:absolute;background:var(--hl);outline:2px solid var(--hlb);pointer-events:none}
+.r{padding:12px 16px}
+.rand{font-family:Consolas,monospace;background:var(--soft);padding:5px 7px;border-radius:4px;margin:2px 0 8px;white-space:pre-wrap}
+.com{font-size:13px;margin-bottom:6px}
+label{display:block;font-size:12px;color:var(--mut);margin:8px 0 2px}
+textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:5px 7px;resize:vertical;font-family:Consolas,monospace;font-size:13px}
+textarea.motiv{font-family:inherit}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+.b-ok{background:var(--okbg);color:var(--ok);border-color:#b9dcc3}
+.b-no{background:var(--nobg);color:var(--no);border-color:#efc2bd}
+.st{font-size:12px;font-weight:600;margin-left:auto;color:var(--ok)}
+.st.modificat{color:var(--mod)} .st.respins{color:var(--no)} .st.fara{color:var(--mut)}
+details{font-size:12px;color:var(--mut);margin-top:10px}
+details pre{white-space:pre-wrap;font-size:12px;background:var(--soft);padding:6px;border-radius:4px}
+.fara{color:var(--mut);font-style:italic}
+.pager{display:flex;gap:8px;justify-content:center;align-items:center;margin:16px 0}
+@media (max-width:900px){.body{grid-template-columns:1fr}.pg{border-right:0;border-bottom:1px solid var(--line)}.meta{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Revizuire corectură</h1>
+  <select id="filtru">
+    <option value="toate">Toate (de la pag. 104)</option>
+    <option value="conf">Corecturi confirmate de scan</option>
+    <option value="carte">Corecturi: cartea are forma actuală</option>
+    <option value="neclar">Corecturi neclare</option>
+    <option value="obsp">Observații cu propunere</option>
+    <option value="obsf">Observații fără propunere încă</option>
+    <option value="rev">Respinse / modificate / făcute</option>
+  </select>
+  <select id="categ">
+    <option value="">Orice categorie</option>
+    <option>Sigur</option>
+    <option>Probabil</option>
+    <option>De verificat</option>
+  </select>
+  <input id="cauta" placeholder="ID, o123, e456, r78 sau text" size="26">
+  <span>pagina <input id="hsari" type="number" min="1" style="width:5em"> / <span id="hnrp"></span></span>
+  <button id="exp">Exportă CSV</button>
+  <input type="file" id="imp" accept=".csv" hidden><button onclick="document.getElementById('imp').click()">Încarcă CSV</button>
+  <span class="stats" id="stats"></span>
+</header>
+<main>
+  <p class="leg"><b>Orice propunere e aprobată implicit</b> – apasă doar <b>Resping</b> la ce nu e corect, schimbă cîmpurile și apasă <b>Salvează modificarea</b>, sau <b>Făcut în InDesign</b> dacă ai corectat-o deja tu.
+  Zona galbenă de pe pagină = locul găsit în original. Căutare: <code>o123</code> = pagina 123 din original, <code>e456</code> = pagina 456 din export, <code>r78</code> = rețeta 78.
+  Acțiuni: Tabel = de corectat manual în InDesign · Despărțire: <code>~-</code> = despărțire discreționară · ¶ = paragraf nou.</p>
+  <div id="lista"></div>
+  <div class="pager"><button id="prev">‹ Înapoi</button>
+    <span>pagina <input id="sari" type="number" min="1" style="width:5em"> / <span id="nrp"></span> · <span id="nri"></span> intrări</span>
+    <button id="next">Înainte ›</button></div>
+</main>
+<script src="date.js"></script>
+<script>
+const KEY = 'revizuire-corectura-v2', PER = 10;
+const ACTS = ['Înlocuire', 'Ștergere', 'Inserare', 'Tabel', 'Despărțire', 'Fără modificare', 'Manual'];
+const VER = {confirmat: ['v-confirmat', 'Scanul confirmă corectura'], 'carte=actual': ['v-carte', 'Cartea are forma actuală'],
+             neclar: ['v-neclar', 'Neclar – verifică pe pagină'], observatie: ['v-obs', 'Observație']};
+const ORI = {'ocr firma': 'greșeala vine din OCR-ul firmei', 'dupa ocr': 'greșeala a apărut după OCR (corectură / Word)'};
+let dec = {}; try { dec = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(dec)); } catch (e) {} };
+let page = 0;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const pad = n => String(n).padStart(4, '0');
+
+function visible() {
+  const f = $('#filtru').value, q = $('#cauta').value.trim().toLowerCase();
+  let mq = q.match(/^([oer])(\d+)$/);
+  const cat = $('#categ').value;
+  return DATE.filter(x => {
+    if (cat && x.cat !== cat) return false;
+    if (f === 'conf' && x.ver !== 'confirmat') return false;
+    if (f === 'carte' && x.ver !== 'carte=actual') return false;
+    if (f === 'neclar' && x.ver !== 'neclar') return false;
+    if (f === 'obsp' && !(x.obs && x.p)) return false;
+    if (f === 'obsf' && !(x.obs && !x.p && !dec[x.id])) return false;
+    if (f === 'rev' && !dec[x.id]) return false;
+    if (q) {
+      if (mq) { const n = +mq[2]; return mq[1] === 'o' ? x.orig === n : mq[1] === 'e' ? x.pag === n : x.ret === n; }
+      if (x.id !== q && !(x.rand + ' ' + x.com + ' ' + (x.p?.cauta || '')).toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+const cur = x => dec[x.id] || x.p || {act: '', cauta: '', inloc: '', motiv: ''};
+
+function hl(x) {
+  if (!x.bb || !x.w) return '';
+  const [x0, y0, x1, y1] = x.bb, P = 0.6;
+  return `<div class="hl" style="left:${x0 / x.w * 100 - P}%;top:${y0 / x.h * 100 - P}%;width:${(x1 - x0) / x.w * 100 + 2 * P}%;height:${(y1 - y0) / x.h * 100 + 2 * P}%"></div>`;
+}
+
+function render() {
+  const v = visible(), n = Math.max(1, Math.ceil(v.length / PER));
+  page = Math.min(page, n - 1);
+  $('#sari').value = page + 1; $('#sari').max = n;
+  $('#nrp').textContent = n; $('#nri').textContent = v.length;
+  $('#hsari').value = page + 1; $('#hsari').max = n; $('#hnrp').textContent = n;
+  const st = {modificat: 0, respins: 0, facut: 0};
+  DATE.forEach(x => { const d = dec[x.id]; if (d) st[d.status]++; });
+  const np = DATE.filter(x => x.p).length;
+  $('#stats').textContent = `${DATE.length} intrări · ${np} cu propunere · respinse ${st.respins} · modificate ${st.modificat} · făcute în InDesign ${st.facut} · restul aprobate implicit`;
+  $('#lista').innerHTML = v.slice(page * PER, page * PER + PER).map(x => {
+    const c = cur(x), s = dec[x.id]?.status || '';
+    const lab = s === 'facut' ? 'făcut în InDesign' : s || (x.p ? 'aprobat (implicit)' : 'fără propunere');
+    const [vc, vt] = VER[x.ver] || ['v-neclar', '?'];
+    return `<div class="card ${s}" data-id="${x.id}">
+      <div class="meta">
+        <div>original<b>${x.orig ?? '?'}</b></div>
+        <div>export<b>${x.pag}</b></div>
+        <div>rețeta<b>${x.ret ?? '–'}</b></div>
+        <div>ID<b>${x.id}</b></div>
+        <div>tip<b>${esc(x.tip)}</b></div>
+        <div class="ver"><span class="badge ${vc}">${vt}</span>${x.ori ? `<br>${ORI[x.ori]}` : ''}<br>${esc(x.cat)}</div>
+      </div>
+      <div class="body">
+        <div class="pg">
+          <div class="tabs"><button class="on" data-t="o">Original</button><button data-t="e">Export</button></div>
+          <div class="page" data-v="o"><img loading="lazy" src="pagini/original/${pad(x.orig)}.jpg" alt="pagina ${x.orig} din original">${hl(x)}</div>
+          <div class="page" data-v="e" hidden><img loading="lazy" data-src="pagini/export/${pad(x.pag)}.jpg" alt="pagina ${x.pag} din export"></div>
+        </div>
+        <div class="r">
+          <label>Rîndul din export</label><div class="rand">${esc(x.rand)}</div>
+          <div class="com">${esc(x.com)}</div>
+          ${x.p || dec[x.id] ? '' : '<p class="fara">Încă fără propunere – poți completa singur.</p>'}
+          <label>Acțiune</label>
+          <select class="act">${['', ...ACTS].map(a => `<option ${a === c.act ? 'selected' : ''}>${a}</option>`).join('')}</select>
+          <label>Caută</label><textarea class="cauta" rows="2">${esc(c.cauta)}</textarea>
+          <label>Înlocuiește cu</label><textarea class="inloc" rows="2">${esc(c.inloc)}</textarea>
+          <label>Motiv / notă</label><textarea class="motiv" rows="3">${esc(c.motiv)}</textarea>
+          <div class="btns">
+            <button class="b-no" data-a="no">Resping</button>
+            <button class="b-ok" data-a="ok">Salvează modificarea</button>
+            <button class="b-done" data-a="done">Făcut în InDesign</button>
+            <button data-a="undo">Anulează</button>
+            <span class="st ${s || (x.p ? '' : 'fara')}">${lab}</span>
+          </div>
+          <details><summary>text din original (OCR firmă / OCR scan)</summary><pre>${esc(x.F.join('\n'))}</pre><pre>${esc(x.W.join('\n'))}</pre></details>
+        </div>
+      </div></div>`;
+  }).join('');
+}
+
+$('#lista').addEventListener('click', e => {
+  const t = e.target.dataset.t;
+  if (t) {
+    const pg = e.target.closest('.pg');
+    pg.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b === e.target));
+    pg.querySelectorAll('.page').forEach(d => d.hidden = d.dataset.v !== t);
+    const img = pg.querySelector(`.page[data-v="${t}"] img`);
+    if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+    return;
+  }
+  const a = e.target.dataset.a; if (!a) return;
+  const card = e.target.closest('.card'), id = card.dataset.id, x = DATE.find(d => d.id === id);
+  if (a === 'undo') { delete dec[id]; save(); render(); return; }
+  const f = {act: card.querySelector('.act').value, cauta: card.querySelector('.cauta').value,
+             inloc: card.querySelector('.inloc').value, motiv: card.querySelector('.motiv').value};
+  const p = x.p || {}, changed = ['act', 'cauta', 'inloc', 'motiv'].some(k => (p[k] || '') !== f[k]);
+  if (a === 'ok' && !changed) delete dec[id];
+  else dec[id] = {...f, status: a === 'no' ? 'respins' : a === 'done' ? 'facut' : 'modificat'};
+  save(); render();
+});
+$('#filtru').onchange = $('#categ').onchange = () => { page = 0; render(); };
+$('#cauta').oninput = () => { page = 0; render(); };
+$('#prev').onclick = () => { page = Math.max(0, page - 1); render(); scrollTo(0, 0); };
+$('#next').onclick = () => { page++; render(); scrollTo(0, 0); };
+$('#sari').onchange = $('#hsari').onchange = e => { page = Math.max(0, (+e.target.value || 1) - 1); render(); scrollTo(0, 0); };
+
+const q = s => '"' + String(s ?? '').replace(/"/g, '""') + '"';
+$('#exp').onclick = () => {
+  const head = ['ID', 'Original', 'Export', 'Reteta', 'Status', 'Actiune', 'Cauta', 'Inlocuieste', 'Motiv', 'Verdict', 'Rand_complet'];
+  const rows = DATE.filter(x => x.p || dec[x.id]).map(x => {
+    const c = cur(x);
+    return [x.id, x.orig, x.pag, x.ret, dec[x.id]?.status || 'aprobat', c.act, c.cauta, c.inloc, c.motiv, x.ver, x.rand].map(q).join(';');
+  });
+  const blob = new Blob(['﻿' + [head.map(q).join(';'), ...rows].join('\r\n')], {type: 'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'Retetar_corectura_revizuita.csv'; a.click();
+};
+function parseCSV(t) {
+  const out = []; let row = [], f = '', inq = false;
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i];
+    if (inq) { if (ch === '"') { if (t[i + 1] === '"') { f += '"'; i++; } else inq = false; } else f += ch; }
+    else if (ch === '"') inq = true;
+    else if (ch === ';') { row.push(f); f = ''; }
+    else if (ch === '\n') { row.push(f.replace(/\r$/, '')); out.push(row); row = []; f = ''; }
+    else f += ch;
+  }
+  if (f || row.length) { row.push(f); out.push(row); }
+  return out;
+}
+$('#imp').onchange = async e => {
+  const file = e.target.files[0]; if (!file) return;
+  const rows = parseCSV((await file.text()).replace(/^﻿/, '')), h = rows.shift();
+  const ix = k => h.indexOf(k); let n = 0;
+  rows.forEach(r => {
+    const s = r[ix('Status')];
+    if (['modificat', 'respins', 'facut'].includes(s)) {
+      dec[r[ix('ID')]] = {status: s, act: r[ix('Actiune')], cauta: r[ix('Cauta')], inloc: r[ix('Inlocuieste')], motiv: r[ix('Motiv')]}; n++;
+    }
+  });
+  save(); render(); alert(n + ' decizii încărcate');
+};
+render();
+</script>
+</body>
+</html>
