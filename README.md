@@ -28,10 +28,10 @@ document and can be undone with one Ctrl+Z.
 
 | Script | Purpose |
 |---|---|
-| `fromat tables retetar - v3.jsx` | Recognises table types by column count and applies a profile to each: column widths, strokes, row heights, alignment, header rows. Skips tables that are already correct. |
+| `format tables retetar - v3.jsx` | Recognises table types by column count and applies a profile to each: column widths, strokes, row heights, alignment, header rows. Skips tables that are already correct. |
 | `cauta in tabele rand total.jsx` (+ `- fereastra`) | Finds tables missing the "Total" row before the nutrition section and inserts it, one by one or all at once. |
 | `change table order.jsx` | Swaps the two tables of every recipe when they follow each other directly. |
-| `delte tables retetar - v1.jsx` | Deletes a specific kind of table identified by its first cell. |
+| `delete tables retetar - v1.jsx` | Deletes a specific kind of table identified by its first cell. |
 | `_increase / _decrease row height 0.1.jsx` | Fine-tunes the row height of selected cells, meant for a keyboard shortcut. |
 | `move the title to next page v2.jsx` | Moves recipe titles that fall too low on the page to the next page through a derived paragraph style; reversible. |
 | `make a title in sentence case.jsx` | Changes the case of all paragraphs in a style, keeps local formatting, capitalises names inside quotes. |
